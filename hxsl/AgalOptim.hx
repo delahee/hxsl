@@ -19,7 +19,7 @@ private class RegInfos {
 	}
 }
 
-//@:noDebug
+@:noDebug
 class AgalOptim {
 
 	static var COMPS = [X, Y, Z, W];

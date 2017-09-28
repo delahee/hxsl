@@ -243,7 +243,8 @@ class ShaderGlobals {
 	}
 
 	public function getInstance( bits : Int, lengths : Array<Array<Int>> ) {
-		var signature = bits + ":" + lengths;
+		var signature = Std.string(bits);
+		if( lengths != null) signature += ":" + lengths;
 		var i = instances.get(signature);
 		if( i != null )
 			return i;
