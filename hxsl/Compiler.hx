@@ -238,7 +238,7 @@ class Compiler {
 				return;
 			case PFor(vname, it, loop):
 				var vt = null;
-				var it = switch( it.v ) {
+				var it : CodeValue = switch( it.v ) {
 				case POp(CInterval, first, last):
 					var first = compileValue(first, false, true);
 					var last = compileValue(last, false, true);
@@ -775,7 +775,7 @@ class Compiler {
 		}
 	}
 
-	function makeOp( op : CodeOp, e1 : ParsedValue, e2 : ParsedValue, p : Position, isCond : Bool ) {
+	function makeOp( op : CodeOp, e1 : ParsedValue, e2 : ParsedValue, p : Position, isCond : Bool ) : CodeValue{
 		var e1 = compileValue(e1, false, isCond || ((op == CEq || op == CNeq) && Type.enumEq(e2.v,PConst(CNull))) );
 		var e2 = compileValue(e2, false, isCond || ((op == CEq || op == CNeq) && e1.t == TNull) );
 
@@ -849,7 +849,7 @@ class Compiler {
 		return null;
 	}
 
-	function makeUnop( op : CodeUnop, e : ParsedValue, p : Position, isCond ) {
+	function makeUnop( op : CodeUnop, e : ParsedValue, p : Position, isCond ) : CodeValue{
 		var e = compileValue(e,false,isCond);
 		var rt = e.t;
 		switch( op ) {

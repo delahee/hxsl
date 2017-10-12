@@ -83,13 +83,27 @@ enum VarType {
 	TObject( fields : Array<{ name : String, t : VarType }> );
 }
 
-typedef Variable = {
-	var id : Int;
-	var name : String;
-	var type : VarType;
-	var kind : VarKind;
-	var index : Int;
-	var pos : Position;
+@:structInit
+class Variable {
+	public var id : Int;
+	public var name : String;
+	public var type : VarType;
+	public var kind : VarKind;
+	public var index : Int;
+	public var pos : Position;
+	
+	public inline function new(id,name,type,kind,index,pos){
+		this.id = id;
+		this.name = name;
+		this.type = type;
+		this.kind = kind;
+		this.index = index;
+		this.pos = pos;
+	}
+	
+	public inline function clone(){
+		return new Variable(id, name, type, kind, index, pos);
+	}
 }
 
 enum CodeOp {
@@ -167,17 +181,35 @@ enum CodeValueDecl {
 	CField( e : CodeValue, f : String );
 }
 
-typedef CodeBlock = Array<{ v: Null<CodeValue>, e:CodeValue }>;
+@:structInit
+class CodeBlockElem {
+	public var v: Null<CodeValue>;
+	public var e:CodeValue;
+	
+	public inline function new( v, e ){
+		this.v = v;
+		this.e = e;
+	}
+}
+
+typedef CodeBlock = Array<CodeBlockElem>;
 
 enum CodeTexFlag {
 	CTFlag( t : TexFlag );
 	CTParam( t : TexParam, value : CodeValue );
 }
 
-typedef CodeValue = {
-	var d : CodeValueDecl;
-	var t : VarType;
-	var p : Position;
+@:structInit
+class CodeValue {
+	public var d : CodeValueDecl;
+	public var t : VarType;
+	public var p : Position;
+	
+	public inline function new( d,t,p ){
+		this.d = d;
+		this.t = t;
+		this.p = p;
+	}
 }
 
 typedef Code = {
