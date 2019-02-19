@@ -27,7 +27,9 @@
 package hxsl;
 import hxsl.Data;
 
-private typedef VarProps = {
+@:structInit
+@:publicFields
+private class VarProps {
 	var global : Bool;
 	var read : Bool;
 	var write : Int;
@@ -35,6 +37,13 @@ private typedef VarProps = {
 	var isVertex : Bool;
 	var value : Const;
 	var ref : Variable;
+}
+
+@:structInit
+@:publicFields
+class ObjectVars{
+	var v : Variable;
+	var fields : Map<String,Variable>;
 }
 
 /**
@@ -51,7 +60,7 @@ class RuntimeCompiler {
 	var varProps : Map<Int,VarProps>;
 	var usedVars : Array<Variable>;
 	var constVars : Array<Variable>;
-	var objectVars : Map<Int,{ v : Variable, fields : Map<String,Variable> }>;
+	var objectVars : Map<Int,ObjectVars>;
 	var varId : Int;
 
 	// force replace of variables by their provided value

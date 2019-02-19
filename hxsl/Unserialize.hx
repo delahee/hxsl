@@ -39,7 +39,7 @@ class Unserialize {
 	}
 	
 	public static function unserialize( s : String ) : Data {
-		return new Unserialize(s).doUnserialize();
+		return ( (new Unserialize(s).doUnserialize()) );
 	}
 	
 	function doUnserialize() {
