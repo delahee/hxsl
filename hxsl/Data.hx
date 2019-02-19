@@ -256,7 +256,7 @@ typedef Error = haxe.macro.Expr.Error;
 
 class Tools {
 
-	public static function swizBits( s : Array<Comp>, t : VarType ) {
+	public static inline function swizBits( s : Array<Comp>, t : VarType ) {
 		if( s == null ) return fullBits(t);
 		var b = 0;
 		for( x in s )
@@ -264,11 +264,11 @@ class Tools {
 		return b;
 	}
 
-	public static function fullBits( t : VarType ) {
+	public static inline function fullBits( t : VarType ) {
 		return (1 << Tools.floatSize(t)) - 1;
 	}
 
-	public static function isFloat( t : VarType ) {
+	public static inline function isFloat( t : VarType ) {
 		return switch( t ) {
 		case TFloat, TFloat2, TFloat3, TFloat4, TInt: true;
 		default: false;
