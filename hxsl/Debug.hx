@@ -155,7 +155,7 @@ class Debug {
 		}
 	}
 	
-	public static function blockStr( b : Array<{ e : CodeValue, v : CodeValue }> ) {
+	public static function blockStr( b : CodeBlock ) : String {
 		var str = "{";
 		for( e in b )
 			str += "\n\t" + exprStr(e.v, e.e);

@@ -27,7 +27,9 @@
 package hxsl;
 import hxsl.Data;
 
-private typedef VarProps = {
+@:structInit
+@:publicFields
+private class VarProps {
 	var global : Bool;
 	var read : Bool;
 	var write : Int;
@@ -35,6 +37,13 @@ private typedef VarProps = {
 	var isVertex : Bool;
 	var value : Const;
 	var ref : Variable;
+}
+
+@:structInit
+@:publicFields
+class ObjectVars{
+	var v : Variable;
+	var fields : Map<String,Variable>;
 }
 
 /**
@@ -51,7 +60,7 @@ class RuntimeCompiler {
 	var varProps : Map<Int,VarProps>;
 	var usedVars : Array<Variable>;
 	var constVars : Array<Variable>;
-	var objectVars : Map<Int,{ v : Variable, fields : Map<String,Variable> }>;
+	var objectVars : Map<Int,ObjectVars>;
 	var varId : Int;
 
 	// force replace of variables by their provided value
@@ -335,7 +344,7 @@ class RuntimeCompiler {
 						// only allow "mov" extension if we are sure that the variable is padded with "1"
 						if( v2.kind == VInput || v2.kind == VVar ) {
 							// remove swizzle on write
-							var vn = Reflect.copy(v);
+							var vn = v.clone();
 							props(v).ref = vn;
 							vn.type = TFloat4;
 							e.v.d = CVar(vn);
@@ -345,7 +354,7 @@ class RuntimeCompiler {
 								var vn2 = p.ref;
 								// allow several writes
 								if( vn2 == null ) {
-									vn2 = Reflect.copy(v2);
+									vn2 = v2.clone();
 									vn2.type = TFloat4;
 									p.ref = vn2;
 								}
@@ -392,7 +401,7 @@ class RuntimeCompiler {
 		return v;
 	}
 
-	function makeConst(index:Int, swiz, p) {
+	function makeConst(index:Int, swiz, p) : CodeValue {
 		var v = allocVar("$c" + index, VConst, TFloat4, p);
 		constVars.push(v);
 		v.index = index;
@@ -948,8 +957,8 @@ class RuntimeCompiler {
 				addAssign( { d : CVar(v, write), t : Tools.makeFloat(write.length), p : p }, allocConst(consts, p), p);
 		}
 		// return temporary
-		var ret = { d : CVar(v), t : v.type, p : p };
-		var sub = { d : CSubBlock(cur.exprs, ret), t : ret.t, p : p };
+		var ret : CodeValue = { d : CVar(v), t : v.type, p : p };
+		var sub : CodeValue = { d : CSubBlock(cur.exprs, ret), t : ret.t, p : p };
 		cur.exprs = old;
 		return sub;
 	}

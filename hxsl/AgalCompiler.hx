@@ -31,8 +31,9 @@ import format.agal.Data;
 import hxsl.Data;
 #end
 
-
-private typedef Temp = {
+@:structInit
+@:publicFields
+private class Temp {
 	var liveBits : Array<Null<Int>>;
 	var lastWritePos : Array<Int>;
 	var assignedTo : Array<Null<Int>>;
@@ -48,14 +49,19 @@ class AgalCompiler {
 	var code : Array<Opcode>;
 	var tempCount : Int;
 	var tempMax : Int;
-	var temps : Array<Temp>;
+	var temps : hxsl.Stack<Temp>;
 	var regs : Array<Array<Temp>>;
 	var codePos : Int;
 	var startRegister : Int;
 	var packRegisters : Bool;
 	var vertex : Bool;
+	
+	static var SWIZ_X = [X];
+	static var SWIZ_XY = [X,Y];
+	static var SWIZ_XYZ = [X,Y,Z];
 
 	public function new() {
+		temps = new hxd.Stack();
 	}
 
 	public dynamic function error( msg : String, p : Position ) {
@@ -217,7 +223,7 @@ class AgalCompiler {
 	function assignRegisters( pack, vertex ) {
 		var maxRegs = format.agal.Tools.getProps(RTemp, !vertex).count;
 		code = uniqueReg();
-		temps = [];
+		temps.hardReset();
 		regs = [];
 		for( i in 0...maxRegs )
 			regs[i] = [];
@@ -288,12 +294,12 @@ class AgalCompiler {
 
 	function regLive( r : Reg, write : Bool ) {
 		if( r.t != RTemp ) return;
-		var t = temps[r.index];
+		var t = temps.get(r.index);
 		if( write ) {
 			// alloc register
 			if( t == null ) {
 				t = { liveBits : [], lastWritePos : [ -1, -1, -1, -1], assignedTo : [], finalRegister : -1, assignedComps : [], assignedPos : [], invAssignedComps : [] };
-				temps[r.index] = t;
+				temps.set(r.index, t);
 			}
 			// set last-write per-component codepos
 			if( r.access != null ) {
@@ -358,7 +364,7 @@ class AgalCompiler {
 				if( from != null && (copy == null || from == copy) ) {
 					copy = from;
 
-					var fromTemp = temps[from];
+					var fromTemp = temps.get(from);
 					var cc = t.assignedComps[ci];
 					if ( fromTemp.lastWritePos[cc.getIndex()] < t.assignedPos[ci] ) {
 						continue;
@@ -411,7 +417,7 @@ class AgalCompiler {
 
 	function regAssign( r : Reg, write : Bool ) {
 		if( r.t != RTemp ) return;
-		var t = temps[r.index];
+		var t = temps.get(r.index);
 		// if we are reading or already live, use our current id
 		if( !write || t.liveBits[codePos] > 0 ) {
 			changeReg(r, t);
@@ -421,7 +427,7 @@ class AgalCompiler {
 		switch( code[codePos] ) {
 		case OMov(dst, src):
 			if( dst.t == RTemp && (src.t == RTemp || src.t == RConst) && src.access == null ) {
-				var t = temps[dst.index];
+				var t = temps.get(dst.index);
 				if( t.liveBits[codePos + 1] == null ) {
 					code[codePos] = OMov(dst, dst); // no-op, will be removed later
 					return;

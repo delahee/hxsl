@@ -39,7 +39,7 @@ class Unserialize {
 	}
 	
 	public static function unserialize( s : String ) : Data {
-		return new Unserialize(s).doUnserialize();
+		return ( (new Unserialize(s).doUnserialize()) );
 	}
 	
 	function doUnserialize() {
@@ -56,7 +56,7 @@ class Unserialize {
 		var args = [];
 		for( i in 0...s.unserialize() )
 			args.push( unserializeVar() );
-		var exprs = [];
+		var exprs : CodeBlock = [];
 		for( i in 0...s.unserialize() )
 			exprs.push( { v:unserializeCodeValue(), e:unserializeCodeValue() } );
 		var consts:Array<Array<Float>> = s.unserialize();
@@ -119,7 +119,7 @@ class Unserialize {
 			var swiz = unserializeSwiz();
 			CSwiz(e, swiz);
 		case 6:
-			var exprs = [];
+			var exprs : CodeBlock = [];
 			for( i in 0...s.unserialize() )
 				exprs.push( {
 					v : unserializeCodeValue(),
@@ -140,14 +140,14 @@ class Unserialize {
 		case 8:
 			var cond = unserializeCodeValue();
 			var eifLen:Int = s.unserialize();
-			var eif = [];
+			var eif : CodeBlock = [];
 			for( i in 0...eifLen ) {
 				var v = unserializeCodeValue();
 				var e = unserializeCodeValue();
 				eif.push({ v : v, e : e });
 			}
 			var eelseLen:Int = s.unserialize();
-			var eelse = null;
+			var eelse : CodeBlock = null;
 			if ( eelseLen != 0 ) {
 				eelse = [];
 				for ( i in 0...eelseLen ) {
@@ -166,7 +166,7 @@ class Unserialize {
 			var v = unserializeVar();
 			var it = unserializeCodeValue();
 			var numExprs:Int = s.unserialize();
-			var exprs = [];
+			var exprs : CodeBlock = [];
 			for ( i in 0...numExprs ) {
 				var v = unserializeCodeValue();
 				var e = unserializeCodeValue();
