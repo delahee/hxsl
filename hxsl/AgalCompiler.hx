@@ -34,13 +34,13 @@ import hxsl.Data;
 @:structInit
 @:publicFields
 private class Temp {
-	var liveBits : Array<Null<Int>>;
-	var lastWritePos : Array<Int>;
-	var assignedTo : Array<Null<Int>>;
-	var assignedPos : Array<Null<Int>>;
-	var finalRegister : Int;
-	var assignedComps : Swizzle;
-	var invAssignedComps : Array<Int>;
+	var liveBits 			: Array<Null<Int>>;
+	var lastWritePos 		: Array<Int>;
+	var assignedTo 			: Array<Null<Int>>;
+	var assignedPos 		: Array<Null<Int>>;
+	var finalRegister 		: Int;
+	var assignedComps 		: Swizzle;
+	var invAssignedComps 	: Array<Int>;
 }
 
 @:noDebug
