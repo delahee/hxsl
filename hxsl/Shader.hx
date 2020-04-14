@@ -94,32 +94,33 @@ class ShaderGlobals {
 
 	static var ALL = new Array<ShaderGlobals>();
 
+	function checkSubType(t:Data.VarType) {
+		switch( t ) {
+		case TNull, TFloat, TBool, TInt, TTexture(_),TFloat2, TFloat3, TFloat4, TMatrix(_):
+		case TArray(t, 0): hasParamLengths = true; checkSubType(t);
+		case TArray(t, _): checkSubType(t);
+		case TObject(fields):
+			for( f in fields )
+				checkSubType(f.t);
+		}
+	}
+
+	function checkType(t:Data.VarType) {
+		switch( t ) {
+		case TNull, TFloat, TBool, TInt, TTexture(_):
+		case TFloat2, TFloat3, TFloat4: hasParamVector = true;
+		case TArray(_): throw "assert";
+		case TMatrix(_): hasParamMatrix = true;
+		case TObject(fields):
+			hasParamObject = true;
+			for( f in fields )
+				checkSubType(f.t);
+		}
+	}
+	
 	public function new( hxStr : String ) {
 		this.data = hxsl.Unserialize.unserialize(hxStr);
-
-		function checkSubType(t:Data.VarType) {
-			switch( t ) {
-			case TNull, TFloat, TBool, TInt, TTexture(_),TFloat2, TFloat3, TFloat4, TMatrix(_):
-			case TArray(t, 0): hasParamLengths = true; checkSubType(t);
-			case TArray(t, _): checkSubType(t);
-			case TObject(fields):
-				for( f in fields )
-					checkSubType(f.t);
-			}
-		}
-
-		function checkType(t:Data.VarType) {
-			switch( t ) {
-			case TNull, TFloat, TBool, TInt, TTexture(_):
-			case TFloat2, TFloat3, TFloat4: hasParamVector = true;
-			case TArray(_): throw "assert";
-			case TMatrix(_): hasParamMatrix = true;
-			case TObject(fields):
-				hasParamObject = true;
-				for( f in fields )
-					checkSubType(f.t);
-			}
-		}
+		
 		hparams = new Map();
 		for( v in Tools.getAllVars(data) )
 			switch( v.kind ) {
@@ -248,9 +249,16 @@ class ShaderGlobals {
 		var i = instances.get(signature);
 		if( i != null )
 			return i;
+			
+		return _getInstance(bits, lengths);
+	}
+	
+	function _getInstance( bits : Int, lengths : Array<Array<Int>> ) {
+		var signature = Std.string(bits);
+		if( lengths != null) signature += ":" + lengths;
 		var data2 = compileShader(bits, lengths);
 
-		i = new ShaderInstance();
+		var i = new ShaderInstance();
 		i.bits = bits;
 		i.lengths = lengths == null ? null : lengths.copy();
 
