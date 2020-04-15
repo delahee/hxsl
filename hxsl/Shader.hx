@@ -89,7 +89,7 @@ class ShaderGlobals {
 
 	var texHasConfig : Vector<Bool>;
 	var constCount : Int;
-	var instances : Map<String,ShaderInstance>;
+	var instances : Map<Int,ShaderInstance>;
 	var hparams : Map<Int,hxsl.Data.Variable>;
 
 	static var ALL = new Array<ShaderGlobals>();
@@ -242,10 +242,27 @@ class ShaderGlobals {
 			}
 		return r.compile(data, params);
 	}
+	
+	function mkSig(lengths : Array<Array<Int>>){
+		var sig = 0xffFFffFF;
+		if (lengths == null)
+			return sig;
+		else {
+			var i = 0;
+			for ( arr in lengths ){
+				for ( elem in arr ){
+					sig = sig ^ (elem * 1337);
+					sig >>= 1;
+				}
+				sig += (1 << (16+i));
+			}
+			return sig;
+		}
+	}
 
 	public function getInstance( bits : Int, lengths : Array<Array<Int>> ) {
-		var signature = Std.string(bits);
-		if( lengths != null) signature += ":" + lengths;
+		var signature = bits;
+		if( lengths != null) signature = signature ^ mkSig(lengths);
 		var i = instances.get(signature);
 		if( i != null )
 			return i;
@@ -254,8 +271,9 @@ class ShaderGlobals {
 	}
 	
 	function _getInstance( bits : Int, lengths : Array<Array<Int>> ) {
-		var signature = Std.string(bits);
-		if( lengths != null) signature += ":" + lengths;
+		var signature = bits;
+		if ( lengths != null) signature = signature ^ mkSig(lengths);
+		
 		var data2 = compileShader(bits, lengths);
 
 		var i = new ShaderInstance();
@@ -405,7 +423,17 @@ class Shader {
 	inline function makeArray<T>(size) : ShaderTypes.FixedArray<T,0> {
 		return new ShaderTypes.FixedArray();
 	}
-
+	
+	inline function toArray(x) : Array<Dynamic> {
+		#if flash
+		return flash.Lib.as(x,Array);
+		#elseif (haxe_ver >= 3.1)
+		return Std.instance(x,Array);
+		#else
+		return Std.is(x,Array) ? cast x : null;
+		#end
+	}
+				
 	function arrayDiffer( a : Array<Dynamic>, b : Array<Dynamic> ) {
 		if( a.length != b.length )
 			return true;
@@ -413,15 +441,7 @@ class Shader {
 			var x : Dynamic = a[i];
 			var y : Dynamic = b[i];
 			if( x != y ) {
-				inline function toArray(x) : Array<Dynamic> {
-					#if flash
-					return flash.Lib.as(x,Array);
-					#elseif (haxe_ver >= 3.1)
-					return Std.instance(x,Array);
-					#else
-					return Std.is(x,Array) ? cast x : null;
-					#end
-				}
+				
 				var ax = toArray(x);
 				if( ax == null ) return true;
 				var ay = toArray(y);
